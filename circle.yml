@@ -1,5 +1,13 @@
+machine:
+  services:
+    - docker
+dependencies:
+  override:
+    - docker info
+    - docker build -t luismesas/deep-learning .
 deployment:
-  production:
+  hub:
     branch: master
     commands:
-      - docker build -t luismesas/deep-learning .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push circleci/elasticsearch
