@@ -1,0 +1,5 @@
+deployment:
+  production:
+    branch: master
+    commands:
+      - docker build -t luismesas/deep-learning .
