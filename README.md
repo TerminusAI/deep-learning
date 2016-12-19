@@ -1,12 +1,10 @@
-# Deep Learning Docker Image
-
-## PULL
+# PULL
 
 ```bash
 docter pull terminus7/deep-learning
 ```
 
-## Description
+# Description
 
 Keras 1.1.2
 
