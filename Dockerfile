@@ -1,6 +1,6 @@
 FROM nvidia/cuda:8.0-cudnn5-devel
 
-MAINTAINER Luis Mesas <luismesas@gmail.com>
+MAINTAINER Luis Mesas <luis.mesas@intelygenz.com>
 
 ARG THEANO_VERSION=rel-0.8.2
 ARG KERAS_VERSION=1.1.2
