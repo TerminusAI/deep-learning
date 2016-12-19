@@ -101,6 +101,11 @@ RUN pip --no-cache-dir install git+git://github.com/Theano/Theano.git@${THEANO_V
 # Install Keras
 RUN pip --no-cache-dir install git+git://github.com/fchollet/keras.git@${KERAS_VERSION}
 
+# cleanup package manager
+RUN apt-get remove --purge -y curl build-essential checkinstall cmake
+RUN apt-get autoclean && apt-get clean
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 
 WORKDIR "/root"
 CMD ["/bin/bash"]
