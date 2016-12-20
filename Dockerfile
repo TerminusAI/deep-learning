@@ -105,16 +105,14 @@ RUN pip --no-cache-dir install \
 		pyasn1
 
 # Install Open CV
-RUN curl -L https://github.com/Itseez/opencv/archive/${OPENCV_VERSION}.zip -o opencv.zip && \
-    unzip opencv.zip && \
-    rm opencv.zip && \
-    mkdir opencv-${OPENCV_VERSION}/release && \
-    cd opencv-${OPENCV_VERSION}/release && \
+RUN git clone https://github.com/opencv/opencv.git && \
+    mkdir opencv/release && \
+    cd opencv/release && \
     cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="5.3" -D CUDA_ARCH_PTX="" -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local .. && \
     make && \
     make install && \
     cd ../.. &&\
-    rm -rf opencv-${OPENCV_VERSION}
+    rm -rf opencv
 
 # Install other useful Python packages using pip
 RUN pip --no-cache-dir install --upgrade ipython && \
