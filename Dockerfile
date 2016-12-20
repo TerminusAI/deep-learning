@@ -4,43 +4,74 @@ MAINTAINER Luis Mesas <luis.mesas@intelygenz.com>
 
 ARG THEANO_VERSION=rel-0.8.2
 ARG KERAS_VERSION=1.1.2
+ARG OPENCV_VERSION=3.1.0
 
-# Install some dependencies
-RUN apt-get update && apt-get install -y \
-		bc \
-		build-essential \
-		cmake \
-		curl \
-		g++ \
-		gfortran \
-		git \
+# update apt cache
+RUN apt-get update
+
+# Base dependencies
+RUN apt-get install -y build-essential cmake checkinstall git pkg-config
+
+# Common libraries
+RUN apt-get install -y \
+        libavcodec-dev \
+		libavformat-dev \
+		libdc1394-22-dev \
 		libffi-dev \
 		libfreetype6-dev \
+		libgtk2.0-dev \
 		libhdf5-dev \
+		libjasper-dev \
 		libjpeg-dev \
 		liblcms2-dev \
 		libopenblas-dev \
 		liblapack-dev \
 		libopenjpeg2 \
-		libpng12-dev \
+		libpng-dev \
 		libssl-dev \
-		libtiff5-dev \
+		libswscale-dev \
+		libtbb2 \
+		libtbb-dev \
+        libtiff-dev \
 		libwebp-dev \
-		libzmq3-dev \
-		nano \
-		pkg-config \
-		python-dev \
+		libzmq3-dev
+#		libpng12-dev \
+#		libtiff5-dev \
+
+
+# GStreamer support
+RUN apt-get install -y \
+        libgstreamer1.0-dev \
+        libgstreamer-plugins-base1.0-dev
+
+# other dependencies
+RUN apt-get install -y \
+		bc \
+		curl \
+		g++ \
+		gfortran \
 		software-properties-common \
 		unzip \
 		vim \
 		wget \
-		zlib1g-dev \
-		&& \
-	apt-get clean && \
-	apt-get autoremove && \
-	rm -rf /var/lib/apt/lists/* && \
+		zlib1g-dev
+
 # Link BLAS library to use OpenBLAS using the alternatives mechanism (https://www.scipy.org/scipylib/building/linux.html#debian-ubuntu)
-	update-alternatives --set libblas.so.3 /usr/lib/openblas-base/libblas.so.3
+RUN update-alternatives --set libblas.so.3 /usr/lib/openblas-base/libblas.so.3
+
+# Install useful Python packages using apt-get to avoid version incompatibilities with Tensorflow binary
+# especially numpy, scipy, skimage and sklearn (see https://github.com/tensorflow/tensorflow/issues/2034)
+RUN apt-get install -y \
+        python-dev \
+		python-numpy \
+		python-scipy \
+		python-nose \
+		python-h5py \
+		python-skimage \
+		python-matplotlib \
+		python-pandas \
+		python-sklearn \
+		python-sympy
 
 # Install pip
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
@@ -53,22 +84,17 @@ RUN pip --no-cache-dir install \
 		ndg-httpsclient \
 		pyasn1
 
-# Install useful Python packages using apt-get to avoid version incompatibilities with Tensorflow binary
-# especially numpy, scipy, skimage and sklearn (see https://github.com/tensorflow/tensorflow/issues/2034)
-RUN apt-get update && apt-get install -y \
-		python-numpy \
-		python-scipy \
-		python-nose \
-		python-h5py \
-		python-skimage \
-		python-matplotlib \
-		python-pandas \
-		python-sklearn \
-		python-sympy \
-		&& \
-	apt-get clean && \
-	apt-get autoremove && \
-	rm -rf /var/lib/apt/lists/*
+# Install Open CV
+RUN curl -L https://github.com/Itseez/opencv/archive/${OPENCV_VERSION}.zip -o opencv.zip && \
+    unzip opencv.zip && \
+    rm opencv.zip && \
+    mkdir opencv-${OPENCV_VERSION}/release && \
+    cd opencv-${OPENCV_VERSION}/release && \
+    cmake -D WITH_CUDA=ON -D CUDA_ARCH_BIN="5.3" -D CUDA_ARCH_PTX="" -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local .. && \
+    make && \
+    make install && \
+    cd ../.. &&\
+    rm -rf opencv-${OPENCV_VERSION}
 
 # Install other useful Python packages using pip
 RUN pip --no-cache-dir install --upgrade ipython && \
@@ -102,7 +128,7 @@ RUN pip --no-cache-dir install git+git://github.com/Theano/Theano.git@${THEANO_V
 RUN pip --no-cache-dir install git+git://github.com/fchollet/keras.git@${KERAS_VERSION}
 
 # cleanup package manager
-RUN apt-get remove --purge -y curl build-essential checkinstall cmake
+RUN apt-get remove --purge -y build-essential cmake checkinstall git pkg-config
 RUN apt-get autoclean && apt-get clean
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
