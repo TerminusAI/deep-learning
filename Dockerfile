@@ -6,14 +6,15 @@ ARG THEANO_VERSION=rel-0.8.2
 ARG KERAS_VERSION=1.1.2
 ARG OPENCV_VERSION=3.1.0
 
-# update apt cache
-RUN apt-get update
-
 # Base dependencies
-RUN apt-get install -y build-essential cmake checkinstall git pkg-config
+RUN apt-get update && apt-get install -y build-essential cmake checkinstall git pkg-config \
+    && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Common libraries
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
         libavcodec-dev \
 		libavformat-dev \
 		libdc1394-22-dev \
@@ -34,18 +35,25 @@ RUN apt-get install -y \
 		libtbb-dev \
         libtiff-dev \
 		libwebp-dev \
-		libzmq3-dev
+		libzmq3-dev \
 #		libpng12-dev \
 #		libtiff5-dev \
-
+    && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # GStreamer support
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
         libgstreamer1.0-dev \
-        libgstreamer-plugins-base1.0-dev
+        libgstreamer-plugins-base1.0-dev \
+    && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # other dependencies
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
 		bc \
 		curl \
 		g++ \
@@ -54,14 +62,22 @@ RUN apt-get install -y \
 		unzip \
 		vim \
 		wget \
-		zlib1g-dev
+		zlib1g-dev \
+    && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Link BLAS library to use OpenBLAS using the alternatives mechanism (https://www.scipy.org/scipylib/building/linux.html#debian-ubuntu)
-RUN update-alternatives --set libblas.so.3 /usr/lib/openblas-base/libblas.so.3
+RUN apt-get update && update-alternatives --set libblas.so.3 /usr/lib/openblas-base/libblas.so.3 \
+    && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install useful Python packages using apt-get to avoid version incompatibilities with Tensorflow binary
 # especially numpy, scipy, skimage and sklearn (see https://github.com/tensorflow/tensorflow/issues/2034)
-RUN apt-get install -y \
+RUN apt-get update && apt-get install -y \
         python-dev \
 		python-numpy \
 		python-scipy \
@@ -71,7 +87,11 @@ RUN apt-get install -y \
 		python-matplotlib \
 		python-pandas \
 		python-sklearn \
-		python-sympy
+		python-sympy \
+    && \
+	apt-get clean && \
+	apt-get autoremove && \
+	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install pip
 RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
@@ -112,7 +132,6 @@ RUN pip --no-cache-dir install --upgrade ipython && \
 		&& \
 	python -m ipykernel.kernelspec
 
-
 # Install Theano and set up Theano config (.theanorc) for CUDA and OpenBLAS
 RUN pip --no-cache-dir install git+git://github.com/Theano/Theano.git@${THEANO_VERSION} && \
 	\
@@ -123,15 +142,9 @@ RUN pip --no-cache-dir install git+git://github.com/Theano/Theano.git@${THEANO_V
 		\n[DebugMode]\ncheck_finite=1" \
 	> /root/.theanorc
 
-
 # Install Keras
 RUN pip --no-cache-dir install git+git://github.com/fchollet/keras.git@${KERAS_VERSION}
 
-# cleanup package manager
-RUN apt-get remove --purge -y build-essential cmake checkinstall git pkg-config
-RUN apt-get autoclean && apt-get clean
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-
+# Working directory
 WORKDIR "/root"
 CMD ["/bin/bash"]
