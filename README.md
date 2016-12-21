@@ -1,9 +1,10 @@
 # PULL
 
 ```bash
-docter pull terminus7/deep-learning
+docker pull terminus7/deep-learning
 ```
 
 # TAGS
 
-* latest: terminus7/gpu-py2-th-kr
+* **terminus7/deep-learning:latest**
+* **terminus7/deep-learning:opencv**
