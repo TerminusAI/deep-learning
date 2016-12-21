@@ -4,10 +4,6 @@
 docter pull terminus7/deep-learning
 ```
 
-# Description
+# TAGS
 
-Keras 1.1.2
-
-Theano 0.8.2
-
-CUDA 8.0
+* latest: terminus7/gpu-py2-th-kr
